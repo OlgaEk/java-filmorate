@@ -11,6 +11,7 @@ import org.springframework.http.*;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmIdException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -35,7 +36,7 @@ class FilmControllerTest {
     }
     @BeforeEach
     void configFilms() {
-        filmController = new FilmController();
+        filmController = new FilmController(new FilmService());
         film = new Film();
         film.setName("Name");
         film.setDescription("Description");

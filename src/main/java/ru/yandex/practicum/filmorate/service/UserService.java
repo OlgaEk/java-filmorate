@@ -12,8 +12,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class UserService {
-
-    HashMap<Long, User> userBase = new HashMap<>();
+    private HashMap<Long, User> userBase = new HashMap<>();
     private Long LastAssignedId = 0l;
 
     public List<User> get(){
@@ -45,4 +44,5 @@ public class UserService {
             return user;
         }
     }
+
 }

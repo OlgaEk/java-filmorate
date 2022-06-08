@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,7 +13,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    UserService userService = new UserService();
+    private UserService userService;
+
+    @Autowired
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> allUsers(){
