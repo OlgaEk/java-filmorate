@@ -16,16 +16,16 @@ public class UserController {
 
     @GetMapping
     public List<User> allUsers(){
-        return userService.getUsers();
+        return userService.get();
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user){
-        return userService.addUser( user);
+        return userService.add( user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) throws NoSuchUserIdException {
-        return userService.updateUser(user);
+        return userService.update(user);
     }
 }
