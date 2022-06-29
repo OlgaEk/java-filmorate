@@ -1,47 +1,87 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.LikeAlreadyAddedException;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmIdException;
+import ru.yandex.practicum.filmorate.exception.NoSuchLikeException;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
 public class FilmService {
-    private HashMap<Long, Film> filmBase = new HashMap<>();
-    private Long LastAssignedId = 0l;
 
-    public List<Film> get(){
-        ArrayList<Film> films = new ArrayList<>();
-        for(Film film : filmBase.values()){
-            films.add(film);
-        }
-        return films;}
+    private FilmStorage filmStorage;
+    private UserStorage userStorage;
 
-    public Film add(Film film){
-        film.setId(++LastAssignedId);
-        filmBase.put(LastAssignedId,film);
-        log.info("Фильм {} добавлен в базу",film);
-        return film;
+    @Autowired
+    public FilmService (FilmStorage filmStorage, UserStorage userStorage){
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
-    public Film update(Film film) throws NoSuchFilmIdException {
-        if(film.getId()==null || film.getId() == 0){
-            return add(film);
+    public List<Film> getAll(){
+        return filmStorage.getAll();
+    }
+
+    public Film get(Long id) {
+        if (!filmStorage.containsFilmId(id)) throw new NoSuchFilmIdException("Фильм по ID = " + id + " не найден");
+        return filmStorage.get(id);
+    }
+
+    public Film add(Film film){
+        return filmStorage.add(film);
+    }
+
+    public Film update(Film film) {
+        if(film.getId() == null || film.getId() == 0){
+            return filmStorage.add(film);
         }
-        if( !filmBase.containsKey(film.getId()) ){
+        if( !filmStorage.containsFilmId (film.getId()) ){
             log.info("Id фильма = {} не найдено в базе фильмов",film.getId());
-            throw new NoSuchFilmIdException("Фильм не найден по Id");
+            throw new NoSuchFilmIdException("Фильм по ID = " + film.getId() + " не найден");
         }
 
         else {
-            filmBase.put(film.getId(),film);
+            filmStorage.update(film);
             log.info("Фильм {} обновлен",film);
             return film;
         }
     }
+
+    public String like(Long idFilm, Long idUser){
+        if (!filmStorage.containsFilmId(idFilm)) throw new NoSuchFilmIdException("Фильм по ID = " + idFilm
+                + " не найден");
+        if(!userStorage.containsUserId(idUser)) throw new NoSuchUserIdException("Пользователь Id = "+ idUser
+                + " не найден");
+        if (!filmStorage.addLike(idFilm, idUser)) throw new LikeAlreadyAddedException("Пользователь ID = " + idUser
+                + "уже ставил лайк фильму ID = " + idFilm);
+        return "Like added";
+    }
+
+    public String dislike(Long idFilm, Long idUser){
+        if (!filmStorage.containsFilmId(idFilm)) throw new NoSuchFilmIdException("Фильм по ID = " + idFilm
+                + " не найден");
+        if(!userStorage.containsUserId(idUser)) throw new NoSuchUserIdException("Пользователь Id = "+ idUser
+                + " не найден");
+        if (!filmStorage.deleteLike (idFilm,idUser)) throw new NoSuchLikeException("Пользователь ID = " + idUser
+                + "не ставил лайк фильму ID = " + idFilm);
+        return "Like deleted";
+
+    }
+
+    public List<Film> popular(Integer count){
+        return filmStorage.getSortedByLikesFilm(count);
+    }
+
+
+
+
 }

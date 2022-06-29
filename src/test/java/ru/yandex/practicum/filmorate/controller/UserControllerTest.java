@@ -14,6 +14,7 @@ import org.springframework.http.*;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.*;
 import java.time.LocalDate;
@@ -36,7 +37,7 @@ class UserControllerTest {
     }
     @BeforeEach
     void configUsers() {
-        userController = new UserController(new UserService());
+        userController = new UserController(new UserService( new InMemoryUserStorage()));
         user = new User();
         user.setName("name");
         user.setEmail("email@email.ru");

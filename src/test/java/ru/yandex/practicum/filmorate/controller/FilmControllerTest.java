@@ -12,12 +12,16 @@ import ru.yandex.practicum.filmorate.exception.NoSuchFilmIdException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +40,7 @@ class FilmControllerTest {
     }
     @BeforeEach
     void configFilms() {
-        filmController = new FilmController(new FilmService());
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(),new InMemoryUserStorage()));
         film = new Film();
         film.setName("Name");
         film.setDescription("Description");
