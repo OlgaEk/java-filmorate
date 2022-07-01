@@ -51,7 +51,7 @@ public class UserService {
         }
     }
 
-    public String addFriend (Long id, Long idFriend){
+    public boolean addFriend (Long id, Long idFriend){
         if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
         if(!userStorage.containsUserId(idFriend)) throw new NoSuchUserIdException("Пользователь Id = "
                 + idFriend + " не найден");
@@ -59,10 +59,10 @@ public class UserService {
                 + " уже был в списке друзей у пользователя ID = " + id);
         if( !userStorage.addFriend(idFriend,id) ) throw new FriendAlreadyAddedException("Пользователь ID = " + id
                 + " уже был в списке друзей у пользователя ID = " + idFriend);
-        return "Friend add";
+        return true;
     }
 
-    public String deleteFriend(Long id, Long idFriend){
+    public boolean deleteFriend(Long id, Long idFriend){
         if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
         if(!userStorage.containsUserId(idFriend)) throw new NoSuchUserIdException("Пользователь Id = "
                 + idFriend + " не найден");
@@ -70,7 +70,7 @@ public class UserService {
                 + " не было в списке друзей у пользователя ID = " + id);
         if(!userStorage.deleteFriend(idFriend,id)) throw new NoSuchFriendException("Пользователя ID = " + id
                 + " не было в списке друзей у пользователя ID = " + idFriend);
-        return "Friend deleted";
+        return true;
     }
 
     public List<User> getFriends(Long id){

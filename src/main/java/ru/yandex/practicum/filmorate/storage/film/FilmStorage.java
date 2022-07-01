@@ -8,16 +8,17 @@ import java.util.Map;
 import java.util.Set;
 
 public interface FilmStorage {
+    //Все методы интерфейса являются public abstract и  модификаторы необязательны.
     //методы добавления, удаления и модификации объектов
-    public Film add(Film film);
-    public Film get (Long id);
-    public Film delete(Film film);
-    public Film update(Film film);
-    public List<Film> getAll();
-    public boolean containsFilmId (Long id);
-    public boolean addLike (Long idFilm, Long IdUser);
-    public boolean deleteLike (Long idFilm, Long idUser);
-    public Map<Long, Set<Long>> getAllLikes ();
-    public List<Film> getSortedByLikesFilm(Integer count);
+    Film add(Film film);
+    Film get (Long id);
+    Film delete(Film film);
+    Film update(Film film);
+    List<Film> getAll();
+    boolean containsFilmId (Long id);
+    boolean addLike (Long idFilm, Long IdUser);
+    boolean deleteLike (Long idFilm, Long idUser);
+    Map<Long, Set<Long>> getAllLikes ();
+    List<Film> getSortedByLikesFilm(Integer count);
 
 }

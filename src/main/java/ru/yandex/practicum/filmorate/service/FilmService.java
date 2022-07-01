@@ -56,24 +56,24 @@ public class FilmService {
         }
     }
 
-    public String like(Long idFilm, Long idUser){
+    public boolean like(Long idFilm, Long idUser){
         if (!filmStorage.containsFilmId(idFilm)) throw new NoSuchFilmIdException("Фильм по ID = " + idFilm
                 + " не найден");
         if(!userStorage.containsUserId(idUser)) throw new NoSuchUserIdException("Пользователь Id = "+ idUser
                 + " не найден");
         if (!filmStorage.addLike(idFilm, idUser)) throw new LikeAlreadyAddedException("Пользователь ID = " + idUser
                 + "уже ставил лайк фильму ID = " + idFilm);
-        return "Like added";
+        return true;
     }
 
-    public String dislike(Long idFilm, Long idUser){
+    public boolean dislike(Long idFilm, Long idUser){
         if (!filmStorage.containsFilmId(idFilm)) throw new NoSuchFilmIdException("Фильм по ID = " + idFilm
                 + " не найден");
         if(!userStorage.containsUserId(idUser)) throw new NoSuchUserIdException("Пользователь Id = "+ idUser
                 + " не найден");
         if (!filmStorage.deleteLike (idFilm,idUser)) throw new NoSuchLikeException("Пользователь ID = " + idUser
                 + "не ставил лайк фильму ID = " + idFilm);
-        return "Like deleted";
+        return true;
 
     }
 

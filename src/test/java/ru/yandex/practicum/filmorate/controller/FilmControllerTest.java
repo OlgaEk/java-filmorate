@@ -54,7 +54,7 @@ class FilmControllerTest {
 
     @Test
     void shouldCreateAndValidateFilm(){
-        filmController.createFilms(film);
+        filmController.createFilm(film);
         assertEquals(1,filmController.getAllFilms().size());
         assertEquals("Name",filmController.getAllFilms().get(0).getName());
         violations = validator.validate(film);
@@ -100,7 +100,7 @@ class FilmControllerTest {
 
     @Test
     void shouldThrowExceptionIfFilmIdNotFound(){
-        filmController.createFilms(film);
+        filmController.createFilm(film);
         film.setId(100l);
         assertThrows(NoSuchFilmIdException.class, () -> filmController.updateFilm(film));
     }

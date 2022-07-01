@@ -5,15 +5,16 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 public interface UserStorage {
+    //Все методы интерфейса являются public abstract и  модификаторы необязательны.
     //методы добавления, удаления и модификации объектов
-    public User add(User user);
-    public User delete(User user);
-    public User update(User user);
-    public List<User> getAll();
-    public User get (Long id);
-    public boolean containsUserId(Long id);
-    public boolean addFriend(Long id, Long idFriend);
-    public boolean deleteFriend(Long id, Long idFriend);
-    public List<User> getFriends(Long id);
-    public List<User> commonFriends(Long id, Long otherId);
+    User add(User user);
+    User delete(User user);
+    User update(User user);
+    List<User> getAll();
+    User get (Long id);
+    boolean containsUserId(Long id);
+    boolean addFriend(Long id, Long idFriend);
+    boolean deleteFriend(Long id, Long idFriend);
+    List<User> getFriends(Long id);
+    List<User> commonFriends(Long id, Long otherId);
 }

@@ -32,7 +32,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film createFilms(@Valid @RequestBody Film film){
+    public Film createFilm(@Valid @RequestBody Film film){
         return filmService.add(film);
     }
 
@@ -40,13 +40,13 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) { return  filmService.update(film); }
 
     @PutMapping("/{id}/like/{userId}")
-    public String addLikeToFilm(@PathVariable Long id,
+    public boolean addLikeToFilm(@PathVariable Long id,
                                 @PathVariable Long userId){
         return filmService.like(id,userId);
     }
 
     @DeleteMapping ("/{id}/like/{userId}")
-    public String deleteLike(@PathVariable Long id,
+    public boolean deleteLike(@PathVariable Long id,
                              @PathVariable Long userId){
         return filmService.dislike(id, userId);
     }
