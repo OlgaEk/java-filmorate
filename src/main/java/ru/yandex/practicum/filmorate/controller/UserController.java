@@ -21,9 +21,10 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> allUsers(){
-        return userService.get();
-    }
+    public List<User> allUsers(){ return userService.getAll();}
+
+    @GetMapping("/{id}")
+    public User getUser (@PathVariable Long id){ return userService.get(id);}
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user){
@@ -34,4 +35,28 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User user) throws NoSuchUserIdException {
         return userService.update(user);
     }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public boolean addFriend (@PathVariable Long id,
+                             @PathVariable Long friendId){
+       return userService.addFriend(id,friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public boolean deleteFriend(@PathVariable Long id,
+                               @PathVariable Long friendId){
+        return userService.deleteFriend(id,friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id){
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id,
+                                       @PathVariable Long otherId){
+        return userService.getCommonFriends(id,otherId);
+        }
+
 }

@@ -1,9 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.FriendAlreadyAddedException;
+import ru.yandex.practicum.filmorate.exception.NoSuchFriendException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,37 +16,75 @@ import java.util.List;
 @Slf4j
 @Service
 public class UserService {
-    private HashMap<Long, User> userBase = new HashMap<>();
-    private Long LastAssignedId = 0l;
+    UserStorage userStorage;
 
-    public List<User> get(){
-        ArrayList<User> users = new ArrayList<>();
-        for(User user: userBase.values()){
-            users.add(user);
+    @Autowired
+    public UserService (UserStorage userStorage){
+        this.userStorage = userStorage;
+    }
+
+    public List<User> getAll(){
+        return userStorage.getAll();
+    }
+    public User get(Long id){
+        if(!userStorage.containsUserId (id)){
+            log.info("Id пользователя = {} не найдено в базе пользователей",id);
+            throw new NoSuchUserIdException("Пользатель по ID = " + id + " не найден");
         }
-        return users;
+        return userStorage.get(id);
     }
 
     public User add(User user){
-        user.setId(++LastAssignedId);
-        userBase.put(LastAssignedId,user);
-        log.info("Пользователь {} добавлен в базу пользователей", user);
-        return user;
+        return userStorage.add(user);
     }
 
-    public User update(User user) throws NoSuchUserIdException {
+    public User update(User user) {
         if(user.getId()==null || user.getId()==0){
-            return add(user);
+            return userStorage.add(user);
         }
-        if(!userBase.containsKey(user.getId())){
+        if(!userStorage.containsUserId (user.getId())){
             log.info("Id пользователя = {} не найдено в базе пользователей",user.getId());
-            throw new NoSuchUserIdException("Пользатель не найден");
+            throw new NoSuchUserIdException("Пользатель по ID = " + user.getId() + " не найден");
         }
             else {
-            userBase.put(user.getId(),user);
-            log.info("Данные пользователя {} обновлены",user);
-            return user;
+            return userStorage.update(user);
         }
     }
+
+    public boolean addFriend (Long id, Long idFriend){
+        if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
+        if(!userStorage.containsUserId(idFriend)) throw new NoSuchUserIdException("Пользователь Id = "
+                + idFriend + " не найден");
+        if( !userStorage.addFriend(id,idFriend) ) throw new FriendAlreadyAddedException("Пользователь ID = " + idFriend
+                + " уже был в списке друзей у пользователя ID = " + id);
+        if( !userStorage.addFriend(idFriend,id) ) throw new FriendAlreadyAddedException("Пользователь ID = " + id
+                + " уже был в списке друзей у пользователя ID = " + idFriend);
+        return true;
+    }
+
+    public boolean deleteFriend(Long id, Long idFriend){
+        if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
+        if(!userStorage.containsUserId(idFriend)) throw new NoSuchUserIdException("Пользователь Id = "
+                + idFriend + " не найден");
+        if(!userStorage.deleteFriend(id,idFriend)) throw new NoSuchFriendException("Пользователя ID = " + idFriend
+                + " не было в списке друзей у пользователя ID = " + id);
+        if(!userStorage.deleteFriend(idFriend,id)) throw new NoSuchFriendException("Пользователя ID = " + id
+                + " не было в списке друзей у пользователя ID = " + idFriend);
+        return true;
+    }
+
+    public List<User> getFriends(Long id){
+        if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
+        return userStorage.getFriends(id);
+    }
+
+    public List<User> getCommonFriends(Long id, Long otherId){
+        if(!userStorage.containsUserId(id)) throw new NoSuchUserIdException("Пользователь Id = "+ id + " не найден");
+        if(!userStorage.containsUserId(otherId))
+            throw new NoSuchUserIdException("Пользователь Id = "+ otherId + " не найден");
+        return userStorage.commonFriends(id,otherId);
+
+    }
+
 
 }
