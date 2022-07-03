@@ -4,6 +4,10 @@ Template repository for Filmorate project.
 Файл с картинкой ER-схемы БД Filmorate находится в ветке add-friends-likes в папке 
 java-filmorate/src/main/resources/QuickDBD-export.png
 
+
+
+![QuickDBD-export](https://github.com/OlgaEk/java-filmorate/blob/add-friends-likes/src/main/resources/QuickDBD-export.png)
+
 Я приняла решение хранить в отдельных таблицах данные пользователей (USER) и данные о фильмах (FILM).
 
 Так же в отдельных таблицах хранится рейтинг фильма (RATING), жанр фильма (GENRE) и статус дружбы (STATUS_OF_FRIEND) - это позволит просто заменять названия рейтингов, жанров   и статуса.
