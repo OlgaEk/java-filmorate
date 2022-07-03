@@ -79,6 +79,6 @@ java-filmorate/src/main/resources/QuickDBD-export.png
  
 По пункту 3 связь логичная, вопрос снимаю
 
-ОТвет
+Ответ
 1) Да, сейчас почитала информацию по ссылке и теперь заменю все типы int2 и int4  на integer
 4) https://postgrespro.ru/docs/postgresql/9.6/queries-table-expressions#queries-where Указано, что название таблицы, порождённой в предложении FROM используется в подзапросах.
