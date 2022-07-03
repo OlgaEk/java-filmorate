@@ -21,29 +21,53 @@ java-filmorate/src/main/resources/QuickDBD-export.png
 
 Примеры запросов:
  - получение всех фильмов 
+ 
  SELECT name
+ 
  FROM film
  
+ 
+ 
  - получение всех пользователей
+ 
  SELECT name
+ 
  FROM user
  
+ 
+ 
  -получение 10 наиболее популярных фильмов
+ 
  SELECT f.name,
+ 
         COUNT (fl.user_id)
+        
  FROM film_like AS fl LEFT INNER JOIN film AS f ON fl.film_id = f.film_id
+ 
  GROUP BY fl.film_id
+ 
  ORDER BY COUNT(fl.user_id) DESC
+ 
  LIMIT 10
  
+ 
+ 
  -получение списка общих друзей для user1(id=1) и user2(id=2)
+ 
  SELECT u.name
+ 
  FROM user_friend AS uf
+ 
  LEFT OUTER JOIN user AS u ON u.user_id = uf.user_friend_id
+ 
  WHERE uf.user_id = 1
+ 
  AND user_friend_id IN (SELECT uf.user_friend_id
+ 
                           FROM uf
+                          
                           WHERE uf.user_id = 2)
+                          
  
  
  
