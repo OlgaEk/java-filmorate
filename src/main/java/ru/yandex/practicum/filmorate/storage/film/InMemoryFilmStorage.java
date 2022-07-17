@@ -77,8 +77,8 @@ public class InMemoryFilmStorage implements FilmStorage{
         return filmLikes.get(idFilm).remove(idUser);
     }
 
-    public Map<Long, Set<Long>> getAllLikes (){
+   /* public Map<Long, Set<Long>> getAllLikes (){
         return filmLikes;
-    }
+    }*/
 
 }
