@@ -60,5 +60,17 @@ public class ErrorHandler {
         return new ErrorResponse(e.getFieldError().getDefaultMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchGenreIdException (final NoSuchGenreIdException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchMpaIdException (final NoSuchMpaIdException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
 
 }

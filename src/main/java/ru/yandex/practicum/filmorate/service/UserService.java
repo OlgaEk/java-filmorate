@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FriendAlreadyAddedException;
 import ru.yandex.practicum.filmorate.exception.NoSuchFriendException;
@@ -26,6 +27,7 @@ public class UserService {
     public List<User> getAll(){
         return userStorage.getAll();
     }
+
     public User get(Long id){
         if(!userStorage.containsUserId (id)){
             log.info("Id пользователя = {} не найдено в базе пользователей",id);
@@ -35,10 +37,12 @@ public class UserService {
     }
 
     public User add(User user){
+        user.setName(user.getName());
         return userStorage.add(user);
     }
 
     public User update(User user) {
+        user.setName(user.getName());
         if(user.getId()==null || user.getId()==0){
             return userStorage.add(user);
         }
@@ -57,8 +61,6 @@ public class UserService {
                 + idFriend + " не найден");
         if( !userStorage.addFriend(id,idFriend) ) throw new FriendAlreadyAddedException("Пользователь ID = " + idFriend
                 + " уже был в списке друзей у пользователя ID = " + id);
-        if( !userStorage.addFriend(idFriend,id) ) throw new FriendAlreadyAddedException("Пользователь ID = " + id
-                + " уже был в списке друзей у пользователя ID = " + idFriend);
         return true;
     }
 
@@ -68,8 +70,6 @@ public class UserService {
                 + idFriend + " не найден");
         if(!userStorage.deleteFriend(id,idFriend)) throw new NoSuchFriendException("Пользователя ID = " + idFriend
                 + " не было в списке друзей у пользователя ID = " + id);
-        if(!userStorage.deleteFriend(idFriend,id)) throw new NoSuchFriendException("Пользователя ID = " + id
-                + " не было в списке друзей у пользователя ID = " + idFriend);
         return true;
     }
 

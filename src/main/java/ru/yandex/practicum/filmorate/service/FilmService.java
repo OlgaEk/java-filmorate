@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.LikeAlreadyAddedException;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmIdException;
@@ -9,13 +10,13 @@ import ru.yandex.practicum.filmorate.exception.NoSuchLikeException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
 @Slf4j
 @Service
+@Qualifier("filmDbStorage")
 public class FilmService {
 
     private FilmStorage filmStorage;
@@ -32,7 +33,10 @@ public class FilmService {
     }
 
     public Film get(Long id) {
-        if (!filmStorage.containsFilmId(id)) throw new NoSuchFilmIdException("Фильм по ID = " + id + " не найден");
+        if( !filmStorage.containsFilmId (id) ) {
+            log.info("Id фильма = {} не найдено в базе фильмов", id);
+            throw new NoSuchFilmIdException("Фильм по ID = " + id + " не найден");
+        }
         return filmStorage.get(id);
     }
 

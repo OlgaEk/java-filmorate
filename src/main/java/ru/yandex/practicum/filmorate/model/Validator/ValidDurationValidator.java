@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.Validator;
+
+import ru.yandex.practicum.filmorate.model.Validator.ValidDuration;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.time.Duration;
-import java.time.LocalDate;
 
 public class ValidDurationValidator implements ConstraintValidator<ValidDuration, Duration> {
     @Override

@@ -71,5 +71,10 @@ public class InMemoryUserStorage implements UserStorage{
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Integer statusOfFriendship(Long id, Long idFriend){
+        return 0;
+    }
+
 
 }

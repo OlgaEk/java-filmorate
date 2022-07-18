@@ -15,10 +15,8 @@ public interface FilmStorage {
     Film delete(Film film);
     Film update(Film film);
     List<Film> getAll();
-    boolean containsFilmId (Long id);
-    boolean addLike (Long idFilm, Long IdUser);
-    boolean deleteLike (Long idFilm, Long idUser);
-    Map<Long, Set<Long>> getAllLikes ();
+    boolean addLike(Long idFilm, Long IdUser);
+    boolean deleteLike(Long idFilm, Long idUser);
     List<Film> getSortedByLikesFilm(Integer count);
-
+    boolean containsFilmId (Long id);
 }

@@ -11,10 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.dao.FriendshipDaoImpl;
 
 import javax.validation.*;
 import java.time.LocalDate;
@@ -26,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest (webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class UserControllerTest {
     static UserController userController;
+    static UserController userControllerDb;
     User user;
     private static Validator validator;
     Set<ConstraintViolation<User>> violations;
@@ -38,11 +43,15 @@ class UserControllerTest {
     @BeforeEach
     void configUsers() {
         userController = new UserController(new UserService( new InMemoryUserStorage()));
-        user = new User();
-        user.setName("name");
-        user.setEmail("email@email.ru");
-        user.setLogin("login");
-        user.setBirthday(LocalDate.of(1900,1,1));
+        userControllerDb = new UserController(
+                new UserService(new UserDbStorage(new JdbcTemplate(),new FriendshipDaoImpl(new JdbcTemplate()))));
+
+        user = User.builder()
+                .email("name@email.com")
+                .login("login")
+                .name("name")
+                .birthday(LocalDate.of(1900, 10, 05))
+                .build();
     }
     @AfterEach
     void clean(){
@@ -64,10 +73,11 @@ class UserControllerTest {
         user.setLogin("");
         violations = validator.validate(user);
         assertEquals(1,violations.size());
-        assertEquals("не должно быть пустым",violations.iterator().next().getMessage());
+        assertEquals("Login должен быть заполнен",violations.iterator().next().getMessage());
         user.setLogin(login);
         violations = validator.validate(user);
-        assertEquals("должно соответствовать \"^\\S*$\"",violations.iterator().next().getMessage());
+        assertEquals("Логин не должен содержать пробелов",violations.iterator().next().getMessage());
+        assertThrows(IllegalStateException.class, () -> userControllerDb.createUser(user));
     }
     private static Stream<Arguments> testLogin() {
         return Stream.of(
@@ -82,11 +92,12 @@ class UserControllerTest {
         user.setEmail("");
         violations = validator.validate(user);
         assertEquals(1,violations.size());
-        assertEquals("не должно быть пустым",violations.iterator().next().getMessage());
+        assertEquals("Email должен быть заполнен",violations.iterator().next().getMessage());
         user.setEmail("@ma.");
         violations = validator.validate(user);
         assertEquals(1,violations.size());
-        assertEquals("должно иметь формат адреса электронной почты",violations.iterator().next().getMessage());
+        assertEquals("Email должен иметь формат адреса электронной почты",violations.iterator().next().getMessage());
+        assertThrows(IllegalStateException.class, () -> userControllerDb.createUser(user));
     }
 
     @Test
@@ -94,7 +105,8 @@ class UserControllerTest {
         user.setBirthday(LocalDate.now());
         violations = validator.validate(user);
         assertEquals(1,violations.size());
-        assertEquals("должно содержать прошедшую дату",violations.iterator().next().getMessage());
+        assertEquals("Дата рождения указана неверно",violations.iterator().next().getMessage());
+        assertThrows(IllegalStateException.class, () -> userControllerDb.createUser(user));
     }
 
     @Test
