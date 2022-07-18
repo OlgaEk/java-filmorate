@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -96,13 +97,28 @@ public class UserDbStorage implements UserStorage{
         return jdbcTemplate.queryForList(sql, id).size()>0;
     }
 
+    //Сразу не поняла как обновлять статус. Потом нашла вариант обновления в slack
+    //Обновление статуса : Если User1 добавляет в друзья User2 статус дружбы User1->User2 "Запрошено"
+    // Если потом User2 добавляет User1 в друзья статус дружбы  изменяется на
+    // User1->User2 "Подтверждено" и User2->User1 "Подтвержденно"
+    // Выполнена вся необходимая подготовка для внесения в бизнес-логику
+
     @Override
     public boolean addFriend(Long id, Long idFriend) {
-        final String sql = "INSERT INTO user_friend (user_id, user_friend_id,status_id) VALUES (?,?,2)";
-        try {
-            return jdbcTemplate.update(sql,id,idFriend) > 0;
-        } catch (DuplicateKeyException ex){
-            return false;
+        final String sqlHaveFriend = "SELECT * FROM user_friend WHERE user_id = ? AND user_friend_id = ?";
+        SqlRowSet i = jdbcTemplate.queryForRowSet(sqlHaveFriend, id, idFriend);
+        SqlRowSet j = jdbcTemplate.queryForRowSet(sqlHaveFriend , idFriend, id);
+        if( i.next()  ) return false;
+        if( j.next()  ){
+            final String sqlUpdate = "UPDATE user_friend SET status_id = 1 WHERE user_id = ? AND user_friend_id = ?";
+            jdbcTemplate.update(sqlUpdate,idFriend,id);
+            final String sqlInsert = "INSERT INTO user_friend (user_id, user_friend_id,status_id) VALUES (?,?,1)";
+            jdbcTemplate.update(sqlInsert , id, idFriend);
+            return true;
+        } else {
+            final String sql = "INSERT INTO user_friend (user_id, user_friend_id,status_id) VALUES (?,?,0)";
+            jdbcTemplate.update(sql, id, idFriend);
+            return true;
         }
     }
 
@@ -133,6 +149,16 @@ public class UserDbStorage implements UserStorage{
                 map(this::get)
                 .collect(Collectors.toList());
     }
+
+
+    @Override
+    public Integer statusOfFriendship(Long id, Long idFriend){
+        final String sql = "SELECT status_id FROM user_friend WHERE user_id = ? AND user_friend_id = ?";
+        return jdbcTemplate.query(sql,(rs, rowNum) -> rs.getInt("status_id"), id,idFriend).get(0);
+    }
+
+
+
 
     private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         return User.builder()

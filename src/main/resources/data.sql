@@ -12,5 +12,5 @@ MERGE INTO genre VALUES (1,'Комедия'),
                         (6, 'Боевик');
 
 MERGE INTO status_of_friend VALUES (1, 'Подтверждено'),
-                                   (2, 'Запрошено');
+                                   (0, 'Запрошено');
 

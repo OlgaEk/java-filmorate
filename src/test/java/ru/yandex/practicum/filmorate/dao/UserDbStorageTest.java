@@ -107,10 +107,15 @@ class UserDbStorageTest {
         userStorage.addFriend(1l,2l);
         assertEquals(false,userStorage.addFriend(1l,2l));
         assertEquals(2,userStorage.getFriends(1l).get(0).getId());
+        assertEquals(0,userStorage.statusOfFriendship(1l,2l));
+        userStorage.addFriend(2l,1l);
+        assertEquals(1,userStorage.statusOfFriendship(1l,2l));
+        assertEquals(1,userStorage.statusOfFriendship(2l,1l));
         userStorage.addFriend(1l,3l);
         userStorage.addFriend(2l,3l);
         assertEquals(3,userStorage.commonFriends(1l,2l).get(0).getId());
         userStorage.deleteFriend(2l,3l);
+        userStorage.deleteFriend(2l,1l);
         assertEquals(0,userStorage.getFriends(2l).size());
     }
 
