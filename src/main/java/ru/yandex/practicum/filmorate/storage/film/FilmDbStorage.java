@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.exception.NoSuchMpaIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.dao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.film.dao.LikeFilmDao;
 import ru.yandex.practicum.filmorate.storage.film.dao.MpaDao;
 
 
@@ -34,32 +35,18 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
+    private final LikeFilmDao likeFilmDao;
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate,GenreDao genreDao,MpaDao mpaDao) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate,GenreDao genreDao,MpaDao mpaDao,LikeFilmDao likeFilmDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreDao = genreDao;
         this.mpaDao = mpaDao;
+        this.likeFilmDao = likeFilmDao;
     }
-
-    // Сейчас проверка на корректность MPA и genre выполняется внутри класса FilmDbStorage
-    // Для текущего задания этого мне кажется достаточно, но при расширении функционала считаю
-    // эти валидации надо перенести в класс Film как кастомные валидации
 
     @Override
     public Film add(Film film) {
-        if(film.getGenres() != null){
-            film.getGenres().stream()
-                    .forEach((k)-> {
-                        if(!genreDao.containsGenreId(k.getId())){
-                            throw new NoSuchGenreIdException("Жанр по ID = " + k.getId() + " не найден");
-                        }
-                    });
-        }
-
-        if(!mpaDao.containsMpaId(film.getMpa().getId())){
-            throw new NoSuchMpaIdException("MPA по ID = " + film.getMpa().getId() + " не найден");
-        }
         final String sqlQuery = "INSERT INTO films (name, description, release_date, duration, mpa) " +
                 "VALUES (?, ?, ?, ? ,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -105,9 +92,6 @@ public class FilmDbStorage implements FilmStorage {
         if(!filmInBase.getGenres().equals(film.getGenres()) && !filmInBase.getGenres().isEmpty()) {
             genreDao.removeGenres(filmInBase);
         }
-        if(!mpaDao.containsMpaId(film.getMpa().getId())){
-            throw new NoSuchMpaIdException("MPA по ID = " + film.getMpa().getId() + " не найден");
-        }
         String sql = "UPDATE films SET " +
                 "name = ?, description = ?, release_date = ?, duration = ?, mpa = ? " +
                 "where film_id = ?";
@@ -137,29 +121,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean addLike(Long idFilm, Long IdUser) {
-        final String sql = "INSERT INTO film_like (film_id,user_id) VALUES ( ?, ? )";
-        try {
-            return jdbcTemplate.update(sql,idFilm,IdUser) > 0;
-        } catch (DuplicateKeyException ex){
-            return false;
-        }
+    public boolean addLike(Long idFilm, Long idUser) {
+        return likeFilmDao.addLike(idFilm,idUser);
     }
 
     @Override
     public boolean deleteLike(Long idFilm, Long idUser) {
-        final String sql = "DELETE FROM film_like WHERE film_id = ? AND user_id = ? ";
-        return jdbcTemplate.update(sql,idFilm,idUser) > 0;
+        return likeFilmDao.deleteLike(idFilm,idUser);
     }
 
     @Override
     public List<Film> getSortedByLikesFilm(Integer count) {
-        final String sql = "SELECT f.film_id " +
-                "FROM films AS f LEFT JOIN film_like AS fl ON f.film_id = fl.film_id " +
-                "GROUP BY f.film_id ORDER BY COUNT(user_id) DESC LIMIT ?";
-        List<Long> result = new ArrayList<>();
-        jdbcTemplate.query(sql,(rs, rowNum) -> result.add(rs.getLong("films.film_id")), count);
-        return result.stream().
+        return likeFilmDao.getSortedByLikesFilm(count).stream().
                 map(this::get)
                 .collect(Collectors.toList());
     }

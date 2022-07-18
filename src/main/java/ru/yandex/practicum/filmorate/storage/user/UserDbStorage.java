@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmIdException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.dao.FriendshipDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -29,10 +30,13 @@ import java.util.stream.Collectors;
 @Primary
 public class UserDbStorage implements UserStorage{
     JdbcTemplate jdbcTemplate;
+    FriendshipDao friendshipDao;
 
     @Autowired
-    public UserDbStorage (JdbcTemplate jdbcTemplate){
+    public UserDbStorage (JdbcTemplate jdbcTemplate, FriendshipDao friendshipDao){
+
         this.jdbcTemplate = jdbcTemplate;
+        this.friendshipDao = friendshipDao;
     }
 
     @Override
@@ -105,35 +109,17 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public boolean addFriend(Long id, Long idFriend) {
-        final String sqlHaveFriend = "SELECT * FROM user_friend WHERE user_id = ? AND user_friend_id = ?";
-        SqlRowSet i = jdbcTemplate.queryForRowSet(sqlHaveFriend, id, idFriend);
-        SqlRowSet j = jdbcTemplate.queryForRowSet(sqlHaveFriend , idFriend, id);
-        if( i.next()  ) return false;
-        if( j.next()  ){
-            final String sqlUpdate = "UPDATE user_friend SET status_id = 1 WHERE user_id = ? AND user_friend_id = ?";
-            jdbcTemplate.update(sqlUpdate,idFriend,id);
-            final String sqlInsert = "INSERT INTO user_friend (user_id, user_friend_id,status_id) VALUES (?,?,1)";
-            jdbcTemplate.update(sqlInsert , id, idFriend);
-            return true;
-        } else {
-            final String sql = "INSERT INTO user_friend (user_id, user_friend_id,status_id) VALUES (?,?,0)";
-            jdbcTemplate.update(sql, id, idFriend);
-            return true;
-        }
+        return friendshipDao.addFriend(id,idFriend);
     }
 
     @Override
     public boolean deleteFriend(Long id, Long idFriend) {
-        final String sql = "DELETE FROM user_friend WHERE user_id = ? AND user_friend_id = ? ";
-        return jdbcTemplate.update(sql,id,idFriend) > 0;
+        return friendshipDao.deleteFriend(id,idFriend);
     }
 
     @Override
     public List<User> getFriends(Long id) {
-        final String sql = "SELECT user_friend_id FROM user_friend WHERE user_id = ?";
-        List<Long> result = new ArrayList<>();
-        jdbcTemplate.query(sql,(rs, rowNum) -> result.add(rs.getLong("user_friend_id")), id);
-        return result.stream().
+        return friendshipDao.getFriends(id).stream().
                 map(this::get)
                 .collect(Collectors.toList());
     }
@@ -141,11 +127,7 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public List<User> commonFriends(Long id, Long otherId) {
-        final String sql = "SELECT user_friend_id FROM user_friend " +
-                "WHERE user_id = ? AND user_friend_id IN (SELECT user_friend_id FROM user_friend WHERE user_id = ?)";
-        List<Long> result = new ArrayList<>();
-        jdbcTemplate.query(sql,(rs, rowNum) -> result.add(rs.getLong("user_friend_id")), id,otherId);
-        return result.stream().
+        return friendshipDao.commonFriends(id,otherId).stream().
                 map(this::get)
                 .collect(Collectors.toList());
     }
@@ -153,8 +135,7 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public Integer statusOfFriendship(Long id, Long idFriend){
-        final String sql = "SELECT status_id FROM user_friend WHERE user_id = ? AND user_friend_id = ?";
-        return jdbcTemplate.query(sql,(rs, rowNum) -> rs.getInt("status_id"), id,idFriend).get(0);
+        return friendshipDao.statusOfFriendship(id,idFriend);
     }
 
 

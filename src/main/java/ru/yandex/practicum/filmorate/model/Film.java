@@ -1,19 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Validator.ValidDate;
+import ru.yandex.practicum.filmorate.model.Validator.ValidGenre;
+import ru.yandex.practicum.filmorate.model.Validator.ValidMpa;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.sql.Date;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -31,7 +28,9 @@ public class Film {
     @Min(value = 1,message = "Продолжительность фильма должна быть больше 1")
     Integer duration; //продолжительность фильма — duration
     @NotNull(message = "У фильма должен быть указан рейтинг MPA")
+    @ValidMpa
     Mpa mpa;
+    @ValidGenre
     List<Genre> genres;
 
 }
